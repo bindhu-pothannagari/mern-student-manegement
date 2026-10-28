@@ -1,10 +1,8 @@
-import {Link} from "react-router-dom";
-export default function NotFound(){
-    return(
-        <section>
-            <h1>404-page Not Found</h1>
-            <p>The page you are looking for does not exist.</p>
-            <Link to="/">Go back home</Link>
-        </section>
-    );
+export default function Privacy() {
+  return (
+    <section>
+      <h1>Privacy Policy</h1>
+      <p>We only collect the student information needed to manage records, and we never share it without permission.</p>
+    </section>
+  );
 }
