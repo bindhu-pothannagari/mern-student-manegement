@@ -10,7 +10,7 @@ const links = [
 export default function Navbar() {
     return(
         <header className ="navbar">
-            <span className="brand"> Student Managment</span>
+            <span className="brand"> Student Management</span>
 <nav>
     {links.map((l) => (
         <NavLink key={l.to} to={l.to} end>

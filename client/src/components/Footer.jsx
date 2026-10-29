@@ -1,7 +1,7 @@
 export default function Footer(){
     return(
         <footer className="footer">
-            <p> {new Date().getFullYear()} Student Management System</p>
+            <p> © {new Date().getFullYear()} Student Management System</p>
         </footer>
     );
 }
