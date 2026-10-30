@@ -49,4 +49,29 @@ The app runs at http://localhost:5173
 ## Verify
 
 - Open http://localhost:5000. You should see `{"message":"API is running"}`.
-- Open http://localhost:5173. You should see the React starter page.
+- - Open http://localhost:5173. You should see the Student Management home page.
+## Database Setup (MongoDB Atlas)
+
+1. Create a free M0 cluster at https://www.mongodb.com/cloud/atlas
+2. Create a database user. Use letters and numbers only in the password.
+3. In **Network Access**, add your current IP address.
+4. Copy `server/.env.example` to `server/.env` and fill in your own values:
+
+```
+PORT=5000
+DB_USER=your_atlas_username
+DB_PASS=your_atlas_password
+DB_HOST=cluster0.xxxxx.mongodb.net
+DB_NAME=student_management
+```
+
+5. Start the server:
+
+```bash
+cd server
+npm run dev
+```
+
+You should see `MongoDB connected` in the terminal.
+
+The `.env` file is ignored by Git and must never be committed.
