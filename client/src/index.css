@@ -66,3 +66,14 @@ th { background: var(--bg-light); }
   .nav-links { display: none; flex-direction: column; width: 100%; padding-top: 12px; }
   .nav-links.open { display: flex; }
 }
+
+/* registration form */
+.form-card { max-width: 560px; margin: 0 auto; }
+.success-message { background: #dcfce7; color: #166534; border: 1px solid #86efac; padding: 12px; border-radius: var(--radius); }
+.form-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn-secondary { background: var(--muted); }
+.btn-secondary:hover { background: #4b5563; }
+.form-group input[aria-invalid="true"],
+.form-group select[aria-invalid="true"],
+.form-group textarea[aria-invalid="true"] { border-color: var(--danger); }
+.form-group textarea { font-family: inherit; }
