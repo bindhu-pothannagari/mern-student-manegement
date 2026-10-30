@@ -49,7 +49,7 @@ The app runs at http://localhost:5173
 ## Verify
 
 - Open http://localhost:5000. You should see `{"message":"API is running"}`.
-- - Open http://localhost:5173. You should see the Student Management home page.
+ - Open http://localhost:5173. You should see the Student Management home page.
 ## Database Setup (MongoDB Atlas)
 
 1. Create a free M0 cluster at https://www.mongodb.com/cloud/atlas
