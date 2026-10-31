@@ -34,6 +34,6 @@ export function errorHandler(err, req, res, next) {
     return res.status(err.statusCode).json({ success: false, message: err.message });
   }
 
-  console.error("Unexpected error:", err.message); // log here, never send details to the client
+  console.error("Unexpected error:", err.message);
   res.status(500).json({ success: false, message: "Internal server error" });
 }

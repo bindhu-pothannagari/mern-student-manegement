@@ -72,6 +72,3 @@ cd server
 npm run dev
 ```
 
-You should see `MongoDB connected` in the terminal.
-
-The `.env` file is ignored by Git and must never be committed.
