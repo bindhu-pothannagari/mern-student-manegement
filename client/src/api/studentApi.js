@@ -36,7 +36,16 @@ async function request(path, options = {}) {
   return body;
 }
 
-export const getStudents = () => request("/students");
+export const getStudents = (params = {}) => {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== "") {
+      query.set(key, String(value));
+    }
+  }
+  const qs = query.toString();
+  return request(`/students${qs ? `?${qs}` : ""}`);
+};
 export const getStudent = (id) => request(`/students/${id}`);
 export const createStudent = (data) =>
   request("/students", { method: "POST", body: JSON.stringify(data) });
