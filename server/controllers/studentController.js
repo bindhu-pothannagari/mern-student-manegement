@@ -2,8 +2,10 @@ import Student from "../models/Student.js";
 import AppError from "../utils/AppError.js";
 
 const ALLOWED_FIELDS = ["fullName", "email", "mobile", "gender", "course", "address"];
+const PAGE_SIZES = [10, 25, 50];
+const SORT_FIELDS = { name: "fullName", createdAt: "createdAt" };
+const GENDERS = ["male", "female", "other"];
 
-// Copy only the allowed fields, so extra fields like "role" are ignored
 function pickAllowed(body = {}) {
   const data = {};
   for (const key of ALLOWED_FIELDS) {
@@ -16,9 +18,73 @@ function pickAllowed(body = {}) {
   return data;
 }
 
+function escapeRegex(text) {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function readString(value, name, maxLength = 100) {
+  if (value === undefined) return undefined;
+  if (typeof value !== "string") {
+    throw new AppError(`${name} must be a single text value`, 400);
+  }
+  const trimmed = value.trim();
+  if (trimmed.length > maxLength) throw new AppError(`${name} is too long`, 400);
+  return trimmed;
+}
+
+function readInt(value, name, fallback) {
+  if (value === undefined) return fallback;
+  if (typeof value !== "string" || !/^\d+$/.test(value)) {
+    throw new AppError(`${name} must be a whole number`, 400);
+  }
+  return Number(value);
+}
+
 export async function getStudents(req, res) {
-  const students = await Student.find().sort({ createdAt: -1 });
-  res.json({ success: true, count: students.length, data: students });
+  const search = readString(req.query.search, "search");
+  const course = readString(req.query.course, "course");
+  const gender = readString(req.query.gender, "gender");
+  const sortKey = readString(req.query.sort, "sort") || "createdAt";
+  const order =
+    readString(req.query.order, "order") || (sortKey === "name" ? "asc" : "desc");
+  const page = readInt(req.query.page, "page", 1);
+  const limit = readInt(req.query.limit, "limit", 10);
+
+  if (page < 1) throw new AppError("page must be 1 or more", 400);
+  if (!PAGE_SIZES.includes(limit)) throw new AppError("limit must be 10, 25 or 50", 400);
+  if (gender && !GENDERS.includes(gender)) throw new AppError("Invalid gender filter", 400);
+  if (!SORT_FIELDS[sortKey]) throw new AppError("sort must be name or createdAt", 400);
+  if (!["asc", "desc"].includes(order)) throw new AppError("order must be asc or desc", 400);
+
+  const filter = {};
+  if (search) {
+    const pattern = new RegExp(escapeRegex(search), "i");
+    filter.$or = [{ fullName: pattern }, { email: pattern }];
+  }
+  if (course) filter.course = course;
+  if (gender) filter.gender = gender;
+
+  const direction = order === "asc" ? 1 : -1;
+
+  const [total, students] = await Promise.all([
+    Student.countDocuments(filter),
+    Student.find(filter)
+      .collation({ locale: "en" })
+      .sort({ [SORT_FIELDS[sortKey]]: direction, _id: direction })
+      .skip((page - 1) * limit)
+      .limit(limit),
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  res.json({
+    success: true,
+    count: students.length,
+    total,
+    page,
+    limit,
+    totalPages,
+    data: students,
+  });
 }
 
 export async function getStudent(req, res) {

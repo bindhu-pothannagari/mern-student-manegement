@@ -29,3 +29,6 @@ const studentSchema = new mongoose.Schema(
 );
 
 export default mongoose.model("Student", studentSchema);
+studentSchema.index({ createdAt: -1 });
+studentSchema.index({ fullName: 1 });
+studentSchema.index({ course: 1 });
