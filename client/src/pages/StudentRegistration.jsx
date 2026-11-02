@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import InputField from "../components/InputField";
 import Button from "../components/Button";
+import { createStudent, getStudent, updateStudent } from "../api/studentApi";
 
 const initialForm = {
   fullName: "",
@@ -26,7 +28,7 @@ const courseOptions = [
 ];
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MOBILE_REGEX = /^[6-9]\d{9}$/; // 10 digits, starting with 6 to 9
+const MOBILE_REGEX = /^[6-9]\d{9}$/;
 
 function validate(form) {
   const errors = {};
@@ -56,12 +58,51 @@ function validate(form) {
   return errors;
 }
 
+function toForm(student) {
+  return {
+    fullName: student.fullName ?? "",
+    email: student.email ?? "",
+    mobile: student.mobile ?? "",
+    gender: student.gender ?? "",
+    course: student.course ?? "",
+    address: student.address ?? "",
+  };
+}
+
 export default function StudentRegistration() {
+  const { id } = useParams();
+  const isEdit = Boolean(id);
+  const navigate = useNavigate();
+
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState("");
+  const [serverError, setServerError] = useState("");
+  const [loadError, setLoadError] = useState("");
+  const [loading, setLoading] = useState(isEdit);
+  const [submitting, setSubmitting] = useState(false);
 
-  // Side effect: hide the success message after 4 seconds
+  // Edit mode: load the existing student
+  useEffect(() => {
+    if (!isEdit) return;
+    let ignore = false;
+    async function load() {
+      try {
+        const res = await getStudent(id);
+        if (!ignore) setForm(toForm(res.data));
+      } catch (err) {
+        if (!ignore) setLoadError(err.message);
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      ignore = true;
+    };
+  }, [id, isEdit]);
+
+  // Hide the success message after 4 seconds
   useEffect(() => {
     if (!success) return;
     const timer = setTimeout(() => setSuccess(""), 4000);
@@ -71,45 +112,95 @@ export default function StudentRegistration() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: "" })); // clear that field's error
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSuccess("");
+    setServerError("");
 
     const newErrors = validate(form);
     setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return; // block invalid submit
+    if (Object.keys(newErrors).length > 0) return;
 
     const cleanData = {
-      ...form,
       fullName: form.fullName.trim(),
       email: form.email.trim().toLowerCase(),
       mobile: form.mobile.trim(),
+      gender: form.gender,
+      course: form.course,
       address: form.address.trim(),
     };
 
-    // Task 8 will send cleanData to the Express API here.
-    console.log("Valid student data:", cleanData);
-
-    setSuccess(`Student ${cleanData.fullName} registered successfully.`);
-    setForm(initialForm);
+    setSubmitting(true);
+    try {
+      if (isEdit) {
+        await updateStudent(id, cleanData);
+        navigate("/students", {
+          state: { message: `${cleanData.fullName} was updated.` },
+        });
+      } else {
+        await createStudent(cleanData);
+        setSuccess(`Student ${cleanData.fullName} registered successfully.`);
+        setForm(initialForm);
+      }
+    } catch (err) {
+      if (err.errors?.length) {
+        const fieldErrors = {};
+        err.errors.forEach((item) => {
+          fieldErrors[item.field] = item.message;
+        });
+        setErrors(fieldErrors);
+      } else if (err.status === 409) {
+        setErrors({ email: err.message });
+      } else {
+        setServerError(err.message);
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleReset = () => {
+    if (isEdit) {
+      navigate("/students");
+      return;
+    }
     setForm(initialForm);
     setErrors({});
     setSuccess("");
+    setServerError("");
   };
+
+  if (loading)
+    return (
+      <p className="status" role="status">
+        Loading student...
+      </p>
+    );
+
+  if (loadError)
+    return (
+      <section className="form-card">
+        <p className="error-box" role="alert">
+          {loadError}
+        </p>
+      </section>
+    );
 
   return (
     <section className="form-card">
-      <h1>Student Registration</h1>
+      <h1>{isEdit ? "Edit Student" : "Student Registration"}</h1>
 
       {success && (
         <p className="success-message" role="status">
           {success}
+        </p>
+      )}
+      {serverError && (
+        <p className="error-box" role="alert">
+          {serverError}
         </p>
       )}
 
@@ -175,9 +266,11 @@ export default function StudentRegistration() {
         />
 
         <div className="form-actions">
-          <Button type="submit">Register</Button>
+          <Button type="submit" disabled={submitting}>
+            {submitting ? "Saving..." : isEdit ? "Update" : "Register"}
+          </Button>
           <Button type="button" variant="secondary" onClick={handleReset}>
-            Reset
+            {isEdit ? "Cancel" : "Reset"}
           </Button>
         </div>
       </form>
