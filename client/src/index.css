@@ -91,3 +91,47 @@ a.btn { color: #fff; text-decoration: none; display: inline-block; }
 .details dt { font-weight: 600; }
 .details dd { margin: 0; }
 .capitalize { text-transform: capitalize; }
+
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  align-items: end;
+  margin: 16px 0;
+}
+
+.filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+}
+
+.filters input,
+.filters select {
+  padding: 8px;
+  font: inherit;
+}
+
+.results-summary {
+  margin: 8px 0;
+}
+
+.table-wrap.is-loading {
+  opacity: 0.6;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
