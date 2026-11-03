@@ -20,9 +20,18 @@ export function setSessionExpiredHandler(handler) {
   onSessionExpired = handler;
 }
 
-async function send(path, { method = "GET", body, auth = true } = {}) {
+function fileNameFrom(header) {
+  if (!header) return "";
+  const encoded = /filename\*=UTF-8''([^;]+)/i.exec(header);
+  if (encoded) return decodeURIComponent(encoded[1]);
+  const plain = /filename="?([^";]+)"?/i.exec(header);
+  return plain ? plain[1] : "";
+}
+
+async function send(path, { method = "GET", body, auth = true, responseType = "json" } = {}) {
+  const isForm = body instanceof FormData;
   const headers = {};
-  if (body !== undefined) headers["Content-Type"] = "application/json";
+  if (body !== undefined && !isForm) headers["Content-Type"] = "application/json";
   if (auth && accessToken) headers.Authorization = `Bearer ${accessToken}`;
 
   let res;
@@ -31,10 +40,14 @@ async function send(path, { method = "GET", body, auth = true } = {}) {
       method,
       headers,
       credentials: "include",
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
     });
   } catch {
     throw new ApiError("Cannot reach the server. Check that the backend is running.");
+  }
+
+  if (res.ok && responseType === "blob") {
+    return { blob: await res.blob(), fileName: fileNameFrom(res.headers.get("Content-Disposition")) };
   }
 
   let data = null;
