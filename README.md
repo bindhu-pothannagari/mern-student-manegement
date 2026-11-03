@@ -70,5 +70,46 @@ DB_NAME=student_management
 ```bash
 cd server
 npm run dev
-```
+
+## Authentication
+
+### Strategy
+JWT access token + refresh token.
+
+- **Access token**: 15 minutes, kept in React memory only (not localStorage), sent as `Authorization: Bearer`.
+- **Refresh token**: 7 days, stored in an `httpOnly`, `sameSite=strict` cookie limited to `/api/auth`. JavaScript cannot read it.
+- On a 401, the API client calls `/api/auth/refresh` once and retries the request.
+- On page reload, the app restores the session from the refresh cookie.
+- **Logout** and **password change/reset** increase the user's `tokenVersion`, so every existing token stops working immediately.
+
+### Security measures
+- Passwords hashed with bcrypt (cost 12); never stored or returned in plain text.
+- Login returns the same message for unknown email and wrong password, and runs bcrypt in both cases to avoid timing differences.
+- Password reset tokens are random 32-byte values; only their SHA-256 hash is stored, they expire after 15 minutes and work once.
+- Forgot-password returns the same response whether or not the email exists.
+- Rate limiting on login, register, forgot and reset.
+- Users cannot set or change their `role`.
+- Secrets live only in `server/.env`; the frontend has no secrets.
+
+### Environment variables (server/.env)
+| Variable | Purpose |
+|---|---|
+| JWT_ACCESS_SECRET | Signs access tokens (long random string) |
+| JWT_REFRESH_SECRET | Signs refresh tokens (different long random string) |
+| ACCESS_TOKEN_TTL | Access token lifetime, e.g. `15m` |
+| REFRESH_TOKEN_TTL | Refresh token lifetime, e.g. `7d` |
+| CLIENT_URL | Frontend origin for CORS and reset links |
+
+Generate a secret:
+`node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"`
+
+### Password reset in development
+Until email is added (Task 14), the reset link is printed in the server terminal. This happens only when `NODE_ENV` is not `production`.
+
+### Pages
+| Path | Access |
+|---|---|
+| /login, /signup | Logged-out users only |
+| /forgot-password, /reset-password/:token | Anyone |
+| /students, /students/:id, /students/:id/edit, /register, /profile | Logged-in users only |
 
