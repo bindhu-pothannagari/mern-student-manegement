@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import InputField from "../components/InputField";
 import Button from "../components/Button";
 import { createStudent, getStudent, updateStudent } from "../api/studentApi";
+import { useAuth } from "../context/AuthContext";
 
 const initialForm = {
   fullName: "",
@@ -73,6 +74,8 @@ export default function StudentRegistration() {
   const { id } = useParams();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
+  const { canEditField } = useAuth();
+  const emailLocked = isEdit && !canEditField("email");
 
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
@@ -133,15 +136,20 @@ export default function StudentRegistration() {
       address: form.address.trim(),
     };
 
+    // Send only the fields this role is allowed to change
+    const payload = isEdit
+      ? Object.fromEntries(Object.entries(cleanData).filter(([key]) => canEditField(key)))
+      : cleanData;
+
     setSubmitting(true);
     try {
       if (isEdit) {
-        await updateStudent(id, cleanData);
+        await updateStudent(id, payload);
         navigate("/students", {
           state: { message: `${cleanData.fullName} was updated.` },
         });
       } else {
-        await createStudent(cleanData);
+        await createStudent(payload);
         setSuccess(`Student ${cleanData.fullName} registered successfully.`);
         setForm(initialForm);
       }
@@ -223,57 +231,7 @@ export default function StudentRegistration() {
           error={errors.email}
           placeholder="e.g. asha@example.com"
           autoComplete="email"
+          disabled={emailLocked}
         />
-        <InputField
-          label="Mobile Number"
-          name="mobile"
-          type="tel"
-          inputMode="numeric"
-          maxLength={10}
-          value={form.mobile}
-          onChange={handleChange}
-          error={errors.mobile}
-          placeholder="10-digit number"
-          autoComplete="tel"
-        />
-        <InputField
-          label="Gender"
-          name="gender"
-          as="select"
-          options={genderOptions}
-          value={form.gender}
-          onChange={handleChange}
-          error={errors.gender}
-        />
-        <InputField
-          label="Course"
-          name="course"
-          as="select"
-          options={courseOptions}
-          value={form.course}
-          onChange={handleChange}
-          error={errors.course}
-        />
-        <InputField
-          label="Address"
-          name="address"
-          as="textarea"
-          value={form.address}
-          onChange={handleChange}
-          error={errors.address}
-          placeholder="House no, street, city, state"
-          autoComplete="street-address"
-        />
-
-        <div className="form-actions">
-          <Button type="submit" disabled={submitting}>
-            {submitting ? "Saving..." : isEdit ? "Update" : "Register"}
-          </Button>
-          <Button type="button" variant="secondary" onClick={handleReset}>
-            {isEdit ? "Cancel" : "Reset"}
-          </Button>
-        </div>
-      </form>
-    </section>
-  );
-}
+        {emailLocked && (
+          <p className="field-note">Only an admin can change a student's email address.</p>
