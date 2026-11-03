@@ -182,3 +182,55 @@
     border-right-color: var(--border);
   }
 }
+
+.auth-page {
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.auth-page .btn {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.auth-page h2 {
+  margin-top: 32px;
+}
+
+.auth-links {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.profile-summary {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 16px;
+}
+
+.profile-summary dt {
+  font-weight: 600;
+}
+
+.profile-summary dd {
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.nav-button {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+.nav-button:hover {
+  text-decoration: underline;
+}
+
+.nav-button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}

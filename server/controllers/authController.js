@@ -84,7 +84,7 @@ export async function login(req, res) {
 
 export async function refresh(req, res) {
   const token = req.cookies?.[REFRESH_COOKIE];
-  if (!token) throw new AppError("Not logged in", 401);
+  if (!token) return res.status(204).end();
 
   let payload;
   try {
