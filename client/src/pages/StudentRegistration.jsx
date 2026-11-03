@@ -233,5 +233,59 @@ export default function StudentRegistration() {
           autoComplete="email"
           disabled={emailLocked}
         />
-        {emailLocked && (
+                {emailLocked && (
           <p className="field-note">Only an admin can change a student's email address.</p>
+        )}
+        <InputField
+          label="Mobile Number"
+          name="mobile"
+          type="tel"
+          inputMode="numeric"
+          maxLength={10}
+          value={form.mobile}
+          onChange={handleChange}
+          error={errors.mobile}
+          placeholder="10-digit number"
+          autoComplete="tel"
+        />
+        <InputField
+          label="Gender"
+          name="gender"
+          as="select"
+          options={genderOptions}
+          value={form.gender}
+          onChange={handleChange}
+          error={errors.gender}
+        />
+        <InputField
+          label="Course"
+          name="course"
+          as="select"
+          options={courseOptions}
+          value={form.course}
+          onChange={handleChange}
+          error={errors.course}
+        />
+        <InputField
+          label="Address"
+          name="address"
+          as="textarea"
+          value={form.address}
+          onChange={handleChange}
+          error={errors.address}
+          placeholder="House no, street, city, state"
+          autoComplete="street-address"
+        />
+
+        <div className="form-actions">
+          <Button type="submit" disabled={submitting}>
+            {submitting ? "Saving..." : isEdit ? "Update" : "Register"}
+          </Button>
+          <Button type="button" variant="secondary" onClick={handleReset}>
+            {isEdit ? "Cancel" : "Reset"}
+          </Button>
+        </div>
+      </form>
+    </section>
+  );
+}
