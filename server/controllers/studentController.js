@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
 import Student from "../models/Student.js";
+import StudentDocument from "../models/StudentDocument.js";
+import { deleteFile } from "../services/fileStorage.js";
+import { queueEnrollmentConfirmation, sendEnrollmentConfirmation } from "../services/email/enrollmentEmail.js";
 import Course from "../models/Course.js";
 import AppError from "../utils/AppError.js";
 import {
@@ -93,6 +96,7 @@ export async function createStudent(req, res) {
 
   const student = await Student.create(data);
   await student.populate("course", COURSE_FIELDS);
+  queueEnrollmentConfirmation(student._id);
   res.status(201).json({ success: true, data: student });
 }
 
@@ -130,4 +134,18 @@ export async function deleteStudent(req, res) {
   await Promise.all([deleteFile(student.photo?.key), ...documents.map((d) => deleteFile(d.key))]);
 
   res.json({ success: true, message: "Student deleted" });
+}
+
+export async function resendEnrollmentEmail(req, res) {
+  const student = await Student.findById(req.params.id).select("enrollmentEmail");
+  if (!student) throw new AppError("Student not found", 404);
+  const status = student.enrollmentEmail?.status;
+  if (status === "sent") throw new AppError("The confirmation email has already been sent", 409);
+  if (status !== "failed") throw new AppError("Only a failed confirmation email can be resent", 409);
+
+  const result = await sendEnrollmentConfirmation(student._id);
+  if (result.status !== "sent") {
+    throw new AppError("The email could not be sent. Please try again later.", 502);
+  }
+  res.json({ success: true, message: "Confirmation email sent" });
 }
