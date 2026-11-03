@@ -1,8 +1,9 @@
+import mongoose from "mongoose";
 import AppError from "../utils/AppError.js";
 
 export default function validateObjectId(req, res, next) {
-  if (!/^[0-9a-fA-F]{24}$/.test(req.params.id)) {
-    return next(new AppError("Invalid student ID", 400));
+  if (!mongoose.isValidObjectId(req.params.id) || !/^[a-f\d]{24}$/i.test(req.params.id)) {
+    throw new AppError("Invalid ID format", 400);
   }
   next();
 }
