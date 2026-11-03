@@ -7,7 +7,8 @@
     "start": "node indexx.js",
     "dev": "nodemon index.js",
     "set-role": "node scripts/setRole.js",
-    "migrate-courses": "node scripts/migrateCourses.js"
+    "migrate-courses": "node scripts/migrateCourses.js",
+    "test": "vitest run"
   },
   "keywords": [],
   "author": "",
@@ -22,9 +23,11 @@
     "express-rate-limit": "^8.7.3",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.11.4",
-    "multer": "^2.5.0"
+    "multer": "^2.5.0",
+    "nodemailer": "^10.3.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "vitest": "^5.1.0"
   }
 }
