@@ -183,3 +183,30 @@ Reading needs `instructors:read` (admin, staff); changes need `instructors:manag
 - `course` is now a course **ID**. Responses include `course: { _id, name, code, status }`.
 - `GET /api/students?course=<courseId>` filters by course.
 - Create and update reject a course ID that is malformed, does not exist, or is **inactive**. A student already in an inactive course can still be edited.
+## File uploads
+
+Uploads use `multipart/form-data` with one file in a field named `file`.
+
+| Method | Endpoint | Permission | Success |
+|---|---|---|---|
+| PUT | /api/students/:id/photo | students:update (admin, staff) | 200, replaces any existing photo |
+| GET | /api/students/:id/photo | students:read (all roles) | 200, image file |
+| DELETE | /api/students/:id/photo | students:update | 200 |
+| GET | /api/students/:id/documents | documents:read (admin, staff) | 200, document list (no storage keys) |
+| POST | /api/students/:id/documents | documents:manage (admin, staff) | 201 |
+| GET | /api/students/:id/documents/:docId/download | documents:read | 200, file as attachment |
+| DELETE | /api/students/:id/documents/:docId | documents:delete (admin) | 200 |
+
+| Rule | Photo | Document |
+|---|---|---|
+| Types | JPG, PNG, WEBP | PDF, JPG, PNG |
+| Max size | 2 MB | 5 MB |
+| Max per student | 1 | 20 |
+
+| Status | When |
+|---|---|
+| 400 | No file, wrong type, extension does not match content |
+| 403 | Role not allowed |
+| 404 | Student, photo or document not found, or file missing from storage |
+| 409 | Document limit reached |
+| 413 | File too large |

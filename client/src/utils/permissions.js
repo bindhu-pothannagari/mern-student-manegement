@@ -7,6 +7,9 @@ const PERMISSIONS = {
   "courses:manage": ["admin"],
   "instructors:read": ["admin", "staff"],
   "instructors:manage": ["admin"],
+  "documents:read": ["admin", "staff"],
+  "documents:manage": ["admin", "staff"],
+  "documents:delete": ["admin"],
   "users:manage": ["admin"],
 };
 
