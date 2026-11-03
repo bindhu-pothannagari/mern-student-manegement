@@ -1,8 +1,9 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import Forbidden from "../pages/Forbidden";
 
-export default function ProtectedRoute() {
-  const { user, checking } = useAuth();
+export default function ProtectedRoute({ permission }) {
+  const { user, checking, can } = useAuth();
   const location = useLocation();
 
   if (checking) {
@@ -14,6 +15,9 @@ export default function ProtectedRoute() {
   }
   if (!user) {
     return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+  if (permission && !can(permission)) {
+    return <Forbidden />;
   }
   return <Outlet />;
 }
