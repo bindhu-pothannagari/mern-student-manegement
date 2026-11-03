@@ -14,6 +14,7 @@ import Signup from "./pages/Signup";
 import Profile from "./pages/Profile";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import Users from "./pages/Users";
 import NotFound from "./pages/NotFound";
 
 export default function App() {
@@ -33,11 +34,24 @@ export default function App() {
           <Route path="/signup" element={<Signup />} />
         </Route>
 
-        <Route element={<ProtectedRoute />}>
+        <Route element={<ProtectedRoute permission="students:read" />}>
           <Route path="/students" element={<StudentList />} />
           <Route path="/students/:id" element={<StudentDetails />} />
-          <Route path="/students/:id/edit" element={<StudentRegistration key="edit" />} />
+        </Route>
+
+        <Route element={<ProtectedRoute permission="students:create" />}>
           <Route path="/register" element={<StudentRegistration key="create" />} />
+        </Route>
+
+        <Route element={<ProtectedRoute permission="students:update" />}>
+          <Route path="/students/:id/edit" element={<StudentRegistration key="edit" />} />
+        </Route>
+
+        <Route element={<ProtectedRoute permission="users:manage" />}>
+          <Route path="/users" element={<Users />} />
+        </Route>
+
+        <Route element={<ProtectedRoute />}>
           <Route path="/profile" element={<Profile />} />
         </Route>
 
