@@ -3,8 +3,8 @@ import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { getStudents, deleteStudent } from "../api/studentApi";
 import Button from "../components/Button";
 import { useAuth } from "../context/AuthContext";
+import useCourseOptions from "../hooks/useCourseOptions";
 
-const COURSES = ["BCA", "BBA", "BSc Computer Science", "MCA"];
 const GENDERS = ["male", "female", "other"];
 const PAGE_SIZES = [10, 25, 50];
 const SORT_OPTIONS = [
@@ -40,6 +40,7 @@ export default function StudentList() {
   const canUpdate = can("students:update");
   const canDelete = can("students:delete");
   const showMobile = canSeeField("mobile");
+  const { courses } = useCourseOptions();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const { search, course, gender, sortValue, page, limit } = readFilters(searchParams);
@@ -181,11 +182,7 @@ export default function StudentList() {
           Course
           <select value={course} onChange={(e) => updateParams({ course: e.target.value })}>
             <option value="">All courses</option>
-            {COURSES.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
+            {courses.map((c) => (<option key={c._id} value={c._id}>{c.name}</option>))}
           </select>
         </label>
 
@@ -293,7 +290,7 @@ export default function StudentList() {
                     <td>{s.fullName}</td>
                     <td>{s.email}</td>
                     {showMobile && <td>{s.mobile}</td>}
-                    <td>{s.course}</td>
+                    <td>{s.course?.code ?? "-"}</td>
                     <td>
                       <div className="row-actions">
                         <Link className="btn btn-small" to={`/students/${s._id}`}>
