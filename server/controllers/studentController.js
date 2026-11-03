@@ -1,14 +1,18 @@
 import Student from "../models/Student.js";
 import AppError from "../utils/AppError.js";
+import {
+  STUDENT_FIELDS,
+  EDITABLE_STUDENT_FIELDS,
+  studentProjection,
+} from "../config/permissions.js";
 
-const ALLOWED_FIELDS = ["fullName", "email", "mobile", "gender", "course", "address"];
 const PAGE_SIZES = [10, 25, 50];
 const SORT_FIELDS = { name: "fullName", createdAt: "createdAt" };
 const GENDERS = ["male", "female", "other"];
 
-function pickAllowed(body = {}) {
+function pickFields(body = {}, allowed) {
   const data = {};
-  for (const key of ALLOWED_FIELDS) {
+  for (const key of allowed) {
     if (body[key] === undefined) continue;
     if (typeof body[key] !== "string") {
       throw new AppError(`${key} must be text`, 400);
@@ -69,6 +73,7 @@ export async function getStudents(req, res) {
   const [total, students] = await Promise.all([
     Student.countDocuments(filter),
     Student.find(filter)
+      .select(studentProjection(req.user.role))
       .collation({ locale: "en" })
       .sort({ [SORT_FIELDS[sortKey]]: direction, _id: direction })
       .skip((page - 1) * limit)
@@ -88,18 +93,26 @@ export async function getStudents(req, res) {
 }
 
 export async function getStudent(req, res) {
-  const student = await Student.findById(req.params.id);
+  const student = await Student.findById(req.params.id).select(studentProjection(req.user.role));
   if (!student) throw new AppError("Student not found", 404);
   res.json({ success: true, data: student });
 }
 
 export async function createStudent(req, res) {
-  const student = await Student.create(pickAllowed(req.body));
+  const student = await Student.create(pickFields(req.body, STUDENT_FIELDS));
   res.status(201).json({ success: true, data: student });
 }
 
 export async function updateStudent(req, res) {
-  const updates = pickAllowed(req.body);
+  const allowed = EDITABLE_STUDENT_FIELDS[req.user.role] ?? [];
+  const blocked = STUDENT_FIELDS.filter(
+    (key) => !allowed.includes(key) && req.body?.[key] !== undefined
+  );
+  if (blocked.length > 0) {
+    throw new AppError(`You are not allowed to change: ${blocked.join(", ")}`, 403);
+  }
+
+  const updates = pickFields(req.body, allowed);
   if (Object.keys(updates).length === 0) {
     throw new AppError("No valid fields to update", 400);
   }

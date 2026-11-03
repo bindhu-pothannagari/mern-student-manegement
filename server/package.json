@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node indexx.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "set-role": "node scripts/setRole.js"
   },
   "keywords": [],
   "author": "",
