@@ -124,5 +124,10 @@ export async function updateStudent(req, res) {
 export async function deleteStudent(req, res) {
   const student = await Student.findByIdAndDelete(req.params.id);
   if (!student) throw new AppError("Student not found", 404);
+
+  const documents = await StudentDocument.find({ student: student._id }).select("+key");
+  await StudentDocument.deleteMany({ student: student._id });
+  await Promise.all([deleteFile(student.photo?.key), ...documents.map((d) => deleteFile(d.key))]);
+
   res.json({ success: true, message: "Student deleted" });
 }
