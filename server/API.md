@@ -62,3 +62,49 @@ Response: `201 Created`
   }
 }
 
+## Authentication
+
+All `/api/students` endpoints require `Authorization: Bearer <accessToken>`.
+Without a valid token they return `401`.
+
+| Method | Endpoint | Auth | Body | Success |
+|---|---|---|---|---|
+| POST | /api/auth/register | No | `{ username, email, password }` | 201, `{ accessToken, data: user }` and refresh cookie |
+| POST | /api/auth/login | No | `{ email, password }` | 200, `{ accessToken, data: user }` and refresh cookie |
+| POST | /api/auth/refresh | Cookie | none | 200, new `accessToken`; 204 if no cookie |
+| POST | /api/auth/logout | Cookie | none | 200, cookie cleared, all tokens invalidated |
+| GET | /api/auth/me | Bearer | none | 200, current user |
+| PATCH | /api/auth/me | Bearer | `{ username?, email? }` | 200, updated user |
+| PATCH | /api/auth/password | Bearer | `{ currentPassword, newPassword }` | 200, new tokens |
+| POST | /api/auth/forgot-password | No | `{ email }` | 200, same message whether or not the email exists |
+| POST | /api/auth/reset-password | No | `{ token, password }` | 200 |
+
+### Rules
+- Username: 3–30 characters, letters, numbers and underscores, stored lowercase
+- Password: 8–72 characters, at least one letter and one number
+- `role` cannot be set through register or profile update; new users are `viewer`
+- Login, register, forgot and reset are limited to 20 requests per 15 minutes per IP (429 after that)
+
+### Error responses
+| Status | When |
+|---|---|
+| 400 | Missing or invalid fields, wrong current password, invalid or expired reset link |
+| 401 | Missing, invalid or expired token; invalid email or password |
+| 409 | Email or username already registered |
+| 429 | Too many attempts |
+
+### Example
+```
+POST /api/auth/login
+Content-Type: application/json
+
+{ "email": "smoke@example.com", "password": "Passw0rd1" }
+```
+```json
+{
+  "success": true,
+  "accessToken": "eyJhbGciOi...",
+  "data": { "_id": "...", "username": "smoketest", "email": "smoke@example.com", "role": "viewer" }
+}
+
+
