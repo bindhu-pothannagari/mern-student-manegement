@@ -136,3 +136,37 @@ Until email is added (Task 14), the reset link is printed in the server terminal
 cd server
 npm run set-role -- your@email.com admin
 ```
+## Courses and instructors
+
+### Data model
+```
+Instructor ──< Course ──< Student
+```
+- `Student.course` references a `Course` by ID (required).
+- `Course.instructor` references an `Instructor` by ID (optional).
+- Course and instructor names are shown with Mongoose `populate`, so renaming a course updates every student automatically.
+- Student counts per course use one MongoDB aggregation (`$group`) for the whole page, not one query per course.
+
+### Deletion rules
+| Delete | Behaviour | Why |
+|---|---|---|
+| Course with students | Blocked (409); set it to inactive instead | Students would point to a course that no longer exists |
+| Course without students | Allowed | Nothing depends on it |
+| Instructor | Allowed; their courses become unassigned | Courses and students stay valid |
+
+### Inactive courses
+Inactive courses stay visible but cannot be chosen for new or moved enrolments. Existing students keep them.
+
+### Permissions
+| | Admin | Staff | Viewer |
+|---|---|---|---|
+| View courses and enrolled students | ✅ | ✅ | ✅ |
+| View instructors | ✅ | ✅ | ❌ |
+| Create, edit, delete courses and instructors | ✅ | ❌ | ❌ |
+
+### Migrating existing data
+Earlier versions stored the course as text. To convert existing students to course references, run this once from `server`:
+```
+npm run migrate-courses
+```
+It creates a Course for each text value and links the students. It is safe to run again.
