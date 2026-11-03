@@ -113,3 +113,26 @@ Until email is added (Task 14), the reset link is printed in the server terminal
 | /forgot-password, /reset-password/:token | Anyone |
 | /students, /students/:id, /students/:id/edit, /register, /profile | Logged-in users only |
 
+
+## Roles and permissions
+
+| Feature | Admin | Staff | Viewer |
+|---|---|---|---|
+| View, search and filter students | ✅ | ✅ | ✅ (no mobile or address) |
+| Add students | ✅ | ✅ | ❌ |
+| Edit students | ✅ | ✅ except email | ❌ |
+| Delete students | ✅ | ❌ | ❌ |
+| Manage users and roles | ✅ | ❌ | ❌ |
+
+### How it works
+- **Server (enforced):** `config/permissions.js` defines the rules. The `authorize(permission)` middleware returns 403 for any role without that permission. Viewers' student queries exclude mobile and address. Staff updates that include `email` are rejected.
+- **Client (convenience):** `utils/permissions.js` mirrors the rules to hide buttons, columns and links. Routes such as `/register` and `/users` show "Access denied" for roles without permission. The server rejects the request anyway.
+- **Role changes** happen only through the admin Users page or the `set-role` script. Users cannot change their own role; `PATCH /api/auth/me` rejects a `role` field.
+- **Self-protection:** admins cannot change their own role or delete themselves, and the last admin cannot be removed.
+- A role change signs the user out, so the new role applies immediately.
+
+### First admin
+```
+cd server
+npm run set-role -- your@email.com admin
+```

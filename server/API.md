@@ -107,4 +107,46 @@ Content-Type: application/json
   "data": { "_id": "...", "username": "smoketest", "email": "smoke@example.com", "role": "viewer" }
 }
 
+## Roles and permissions
+
+Roles: `admin`, `staff`, `viewer`. New accounts are always `viewer`.
+
+| Permission | admin | staff | viewer |
+|---|---|---|---|
+| students:read | ✅ | ✅ | ✅ (mobile and address hidden) |
+| students:create | ✅ | ✅ | ❌ |
+| students:update | ✅ all fields | ✅ all except email | ❌ |
+| students:delete | ✅ | ❌ | ❌ |
+| users:manage | ✅ | ❌ | ❌ |
+
+- 401: not logged in, or token invalid or expired
+- 403: logged in but not allowed (for example, a viewer deleting a student, or staff changing an email)
+
+Rules are defined in `server/config/permissions.js` and enforced by `middleware/authorize.js`. The role is read from the database on every request, not from the token.
+
+## User management (admin only)
+
+| Method | Endpoint | Body | Success |
+|---|---|---|---|
+| GET | /api/users?search=&role=&page=&limit= | none | 200, paginated users |
+| PATCH | /api/users/:id/role | `{ "role": "staff" }` | 200, updated user; that user is signed out |
+| DELETE | /api/users/:id | none | 200 |
+
+| Status | When |
+|---|---|
+| 400 | Invalid role, invalid ID, bad query parameters |
+| 403 | Not an admin, or trying to change your own role or delete yourself |
+| 404 | User not found |
+| 409 | Would remove the last admin |
+
+## Creating the first admin
+
+New users are always viewers. To promote a user, run this from the `server` folder (requires database access):
+
+```
+npm run set-role -- user@example.com admin
+```
+
+After that, admins manage roles from the Users page.
+
 
