@@ -11,6 +11,17 @@ const photoSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const enrollmentEmailSchema = new mongoose.Schema(
+  {
+    status: { type: String, enum: ["pending", "sending", "sent", "failed"], default: "pending" },
+    attempts: { type: Number, default: 0 },
+    sentAt: { type: Date },
+    messageId: { type: String },
+    lastError: { type: String },
+  },
+  { _id: false }
+);
+
 const studentSchema = new mongoose.Schema(
   {
     fullName: { type: String, required: [true, "Full name is required"], trim: true, minlength: 3 },
@@ -40,6 +51,7 @@ const studentSchema = new mongoose.Schema(
     },
     address: { type: String, required: [true, "Address is required"], trim: true, minlength: 10 },
     photo: { type: photoSchema, default: null },
+    enrollmentEmail: { type: enrollmentEmailSchema, default: () => ({}) },
   },
   { timestamps: true }
 );
@@ -52,6 +64,9 @@ studentSchema.set("toJSON", {
   transform(doc, ret) {
     if (ret.photo) {
       ret.photo = { mimeType: ret.photo.mimeType, size: ret.photo.size, uploadedAt: ret.photo.uploadedAt };
+    }
+    if (ret.enrollmentEmail) {
+      ret.enrollmentEmail = { status: ret.enrollmentEmail.status, sentAt: ret.enrollmentEmail.sentAt, attempts: ret.enrollmentEmail.attempts };
     }
     delete ret.__v;
     return ret;

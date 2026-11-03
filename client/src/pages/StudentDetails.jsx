@@ -4,6 +4,7 @@ import { getStudent, deleteStudent } from "../api/studentApi";
 import { useAuth } from "../context/AuthContext";
 import StudentPhoto from "../components/StudentPhoto";
 import StudentDocuments from "../components/StudentDocuments";
+import EnrollmentEmailStatus from "../components/EnrollmentEmailStatus";
 
 export default function StudentDetails() {
   const { id } = useParams();
@@ -95,6 +96,18 @@ export default function StudentDetails() {
         )}
         <dt>Registered</dt>
         <dd>{new Date(student.createdAt).toLocaleDateString()}</dd>
+        {student.enrollmentEmail && (
+          <>
+            <dt>Confirmation email</dt>
+            <dd>
+              <EnrollmentEmailStatus
+                studentId={student._id}
+                email={student.enrollmentEmail}
+                canResend={can("students:update")}
+              />
+            </dd>
+          </>
+        )}
       </dl>
       <div className="form-actions">
         {can("students:update") && (

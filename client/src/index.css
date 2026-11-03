@@ -215,3 +215,27 @@ h1 small {
 .documents {
   margin-top: 32px;
 }
+
+.email-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.status-email-sent {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-email-failed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-email-pending,
+.status-email-sending,
+.status-email-none {
+  background: #f3f4f6;
+  color: #4b5563;
+}
