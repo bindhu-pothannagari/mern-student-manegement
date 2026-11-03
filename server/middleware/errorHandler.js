@@ -21,7 +21,7 @@ export function errorHandler(err, req, res, next) {
     const field = Object.keys(err.keyPattern || {})[0] || "value";
     return res
       .status(409)
-      .json({ success: false, message: `A student with this ${field} already exists` });
+            .json({ success: false, message: `A record with this ${field} already exists` });
   }
 
   if (err.type === "entity.parse.failed") {
