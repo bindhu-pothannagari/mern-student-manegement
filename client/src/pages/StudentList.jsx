@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { getStudents, deleteStudent } from "../api/studentApi";
 import Button from "../components/Button";
+import { useAuth } from "../context/AuthContext";
 
 const COURSES = ["BCA", "BBA", "MCA"];
 const GENDERS = ["male", "female", "other"];
@@ -34,6 +35,12 @@ const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1);
 
 export default function StudentList() {
   const location = useLocation();
+  const { can, canSeeField } = useAuth();
+  const canCreate = can("students:create");
+  const canUpdate = can("students:update");
+  const canDelete = can("students:delete");
+  const showMobile = canSeeField("mobile");
+
   const [searchParams, setSearchParams] = useSearchParams();
   const { search, course, gender, sortValue, page, limit } = readFilters(searchParams);
   const [sort, order] = sortValue.split("-");
@@ -140,9 +147,11 @@ export default function StudentList() {
     <section>
       <div className="page-header">
         <h1>Students</h1>
-        <Link className="btn" to="/register">
-          Add student
-        </Link>
+        {canCreate && (
+          <Link className="btn" to="/register">
+            Add student
+          </Link>
+        )}
       </div>
 
       {message && (
@@ -252,9 +261,11 @@ export default function StudentList() {
           ) : (
             <>
               <p>No students yet.</p>
-              <Link className="btn" to="/register">
-                Register the first student
-              </Link>
+              {canCreate && (
+                <Link className="btn" to="/register">
+                  Register the first student
+                </Link>
+              )}
             </>
           )}
         </div>
@@ -271,7 +282,7 @@ export default function StudentList() {
                 <tr>
                   <th>Name</th>
                   <th>Email</th>
-                  <th>Mobile</th>
+                  {showMobile && <th>Mobile</th>}
                   <th>Course</th>
                   <th>Actions</th>
                 </tr>
@@ -281,26 +292,30 @@ export default function StudentList() {
                   <tr key={s._id}>
                     <td>{s.fullName}</td>
                     <td>{s.email}</td>
-                    <td>{s.mobile}</td>
+                    {showMobile && <td>{s.mobile}</td>}
                     <td>{s.course}</td>
                     <td>
                       <div className="row-actions">
                         <Link className="btn btn-small" to={`/students/${s._id}`}>
                           View
                         </Link>
-                        <Link
-                          className="btn btn-small btn-secondary"
-                          to={`/students/${s._id}/edit`}
-                        >
-                          Edit
-                        </Link>
-                        <button
-                          type="button"
-                          className="btn btn-small btn-danger"
-                          onClick={() => handleDelete(s)}
-                        >
-                          Delete
-                        </button>
+                        {canUpdate && (
+                          <Link
+                            className="btn btn-small btn-secondary"
+                            to={`/students/${s._id}/edit`}
+                          >
+                            Edit
+                          </Link>
+                        )}
+                        {canDelete && (
+                          <button
+                            type="button"
+                            className="btn btn-small btn-danger"
+                            onClick={() => handleDelete(s)}
+                          >
+                            Delete
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

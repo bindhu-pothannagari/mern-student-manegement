@@ -9,8 +9,9 @@ const publicLinks = [
 ];
 
 const memberLinks = [
-  { to: "/students", label: "Students" },
-  { to: "/register", label: "Add student" },
+  { to: "/students", label: "Students", permission: "students:read" },
+  { to: "/register", label: "Add student", permission: "students:create" },
+  { to: "/users", label: "Users", permission: "users:manage" },
 ];
 
 const footerLinks = [
@@ -20,10 +21,11 @@ const footerLinks = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const { user, checking, logout } = useAuth();
+  const { user, checking, can, logout } = useAuth();
   const navigate = useNavigate();
 
-  const links = [...publicLinks, ...(user ? memberLinks : []), ...footerLinks];
+  const allowed = memberLinks.filter((link) => can(link.permission));
+  const links = [...publicLinks, ...allowed, ...footerLinks];
   const close = () => setOpen(false);
 
   const handleLogout = async () => {
@@ -53,7 +55,7 @@ export default function Navbar() {
         {!checking && user && (
           <>
             <NavLink to="/profile" onClick={close}>
-              {user.username}
+              {user.username} ({user.role})
             </NavLink>
             <button type="button" className="nav-button" onClick={handleLogout}>
               Log out
