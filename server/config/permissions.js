@@ -6,6 +6,9 @@ export const PERMISSIONS = {
   "courses:read": ["admin", "staff", "viewer"],
   "courses:manage": ["admin"],
   "instructors:read": ["admin", "staff"],
+    "documents:read": ["admin", "staff"],
+  "documents:manage": ["admin", "staff"],
+  "documents:delete": ["admin"],
   "instructors:manage": ["admin"],
   "users:manage": ["admin"],
 };

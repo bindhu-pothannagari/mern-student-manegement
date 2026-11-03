@@ -1,5 +1,16 @@
 import mongoose from "mongoose";
 
+const photoSchema = new mongoose.Schema(
+  {
+    key: { type: String, required: true },
+    mimeType: { type: String, required: true },
+    size: { type: Number, required: true },
+    originalName: { type: String },
+    uploadedAt: { type: Date, default: Date.now },
+  },
+  { _id: false }
+);
+
 const studentSchema = new mongoose.Schema(
   {
     fullName: { type: String, required: [true, "Full name is required"], trim: true, minlength: 3 },
@@ -28,6 +39,7 @@ const studentSchema = new mongoose.Schema(
       required: [true, "Course is required"],
     },
     address: { type: String, required: [true, "Address is required"], trim: true, minlength: 10 },
+    photo: { type: photoSchema, default: null },
   },
   { timestamps: true }
 );
@@ -35,5 +47,15 @@ const studentSchema = new mongoose.Schema(
 studentSchema.index({ createdAt: -1 });
 studentSchema.index({ fullName: 1 });
 studentSchema.index({ course: 1 });
+
+studentSchema.set("toJSON", {
+  transform(doc, ret) {
+    if (ret.photo) {
+      ret.photo = { mimeType: ret.photo.mimeType, size: ret.photo.size, uploadedAt: ret.photo.uploadedAt };
+    }
+    delete ret.__v;
+    return ret;
+  },
+});
 
 export default mongoose.model("Student", studentSchema);
