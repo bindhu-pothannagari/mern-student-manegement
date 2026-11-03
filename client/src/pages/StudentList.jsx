@@ -4,7 +4,7 @@ import { getStudents, deleteStudent } from "../api/studentApi";
 import Button from "../components/Button";
 import { useAuth } from "../context/AuthContext";
 
-const COURSES = ["BCA", "BBA", "MCA"];
+const COURSES = ["BCA", "BBA", "BSc Computer Science", "MCA"];
 const GENDERS = ["male", "female", "other"];
 const PAGE_SIZES = [10, 25, 50];
 const SORT_OPTIONS = [
