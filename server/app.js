@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/authRoutes.js";
 import studentRoutes from "./routes/studentRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 import requireAuth from "./middleware/requireAuth.js";
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
 
@@ -23,6 +24,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/students", requireAuth, studentRoutes);
+app.use("/api/users", requireAuth, userRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
