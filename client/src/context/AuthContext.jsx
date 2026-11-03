@@ -7,6 +7,7 @@ import {
   changePassword as changePasswordRequest,
   updateMe,
 } from "../api/authApi.js";
+import { can, canSeeField, canEditField } from "../utils/permissions.js";
 
 const AuthContext = createContext(null);
 
@@ -46,6 +47,9 @@ export function AuthProvider({ children }) {
     return {
       user,
       checking,
+      can: (permission) => can(user, permission),
+      canSeeField: (field) => canSeeField(user, field),
+      canEditField: (field) => canEditField(user, field),
       login: async (email, password) => startSession(await loginUser({ email, password })),
       register: async (data) => startSession(await registerUser(data)),
       logout: async () => {

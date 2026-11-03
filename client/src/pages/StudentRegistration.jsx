@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import InputField from "../components/InputField";
 import Button from "../components/Button";
 import { createStudent, getStudent, updateStudent } from "../api/studentApi";
+import { useAuth } from "../context/AuthContext";
 
 const initialForm = {
   fullName: "",
@@ -73,6 +74,8 @@ export default function StudentRegistration() {
   const { id } = useParams();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
+  const { canEditField } = useAuth();
+  const emailLocked = isEdit && !canEditField("email");
 
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
@@ -133,15 +136,20 @@ export default function StudentRegistration() {
       address: form.address.trim(),
     };
 
+    // Send only the fields this role is allowed to change
+    const payload = isEdit
+      ? Object.fromEntries(Object.entries(cleanData).filter(([key]) => canEditField(key)))
+      : cleanData;
+
     setSubmitting(true);
     try {
       if (isEdit) {
-        await updateStudent(id, cleanData);
+        await updateStudent(id, payload);
         navigate("/students", {
           state: { message: `${cleanData.fullName} was updated.` },
         });
       } else {
-        await createStudent(cleanData);
+        await createStudent(payload);
         setSuccess(`Student ${cleanData.fullName} registered successfully.`);
         setForm(initialForm);
       }
@@ -223,7 +231,11 @@ export default function StudentRegistration() {
           error={errors.email}
           placeholder="e.g. asha@example.com"
           autoComplete="email"
+          disabled={emailLocked}
         />
+                {emailLocked && (
+          <p className="field-note">Only an admin can change a student's email address.</p>
+        )}
         <InputField
           label="Mobile Number"
           name="mobile"
