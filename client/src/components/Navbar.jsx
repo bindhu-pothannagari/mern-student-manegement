@@ -11,6 +11,7 @@ const publicLinks = [
 const memberLinks = [
   { to: "/students", label: "Students", permission: "students:read" },
   { to: "/register", label: "Add student", permission: "students:create" },
+    { to: "/courses", label: "Courses", permission: "courses:read" },
   { to: "/users", label: "Users", permission: "users:manage" },
 ];
 

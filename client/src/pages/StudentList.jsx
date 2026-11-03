@@ -293,7 +293,7 @@ export default function StudentList() {
                     <td>{s.fullName}</td>
                     <td>{s.email}</td>
                     {showMobile && <td>{s.mobile}</td>}
-                    <td>{s.course}</td>
+                    <td>{s.course?.code ?? "-"}</td>
                     <td>
                       <div className="row-actions">
                         <Link className="btn btn-small" to={`/students/${s._id}`}>
