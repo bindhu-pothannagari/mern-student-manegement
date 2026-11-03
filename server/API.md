@@ -210,3 +210,20 @@ Uploads use `multipart/form-data` with one file in a field named `file`.
 | 404 | Student, photo or document not found, or file missing from storage |
 | 409 | Document limit reached |
 | 413 | File too large |
+
+## Enrollment confirmation email
+
+Sent automatically after a student is created. Sending happens in the background, so the create request never waits for or fails because of email.
+
+`enrollmentEmail` on each student:
+
+| status | Meaning |
+|---|---|
+| pending | Saved, email not attempted yet |
+| sending | An attempt is in progress |
+| sent | Delivered to the mail server (`sentAt` is set) |
+| failed | The attempt failed; can be resent |
+
+| Method | Endpoint | Permission | Success |
+|---|---|---|---|
+| POST | /api/students/:id/enrollment-email | students:update (admin, staff) | 200 sent; 409 if already sent or not failed; 502 if it fails again |

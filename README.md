@@ -190,3 +190,38 @@ It creates a Course for each text value and links the students. It is safe to ru
 - New file saved, then database updated; if the database update fails, the new file is deleted.
 - On replace, the old file is deleted only after the database update succeeds.
 - Deleting a student deletes their photo, documents and document records.
+## Email notifications
+
+### What is sent
+An enrollment confirmation (student name, course name and code, duration, enrollment date) is sent to the student after they are registered.
+
+### Configuration (server/.env)
+| Variable | Purpose |
+|---|---|
+| EMAIL_FROM_NAME | Sender name, e.g. `Student Management System` |
+| EMAIL_FROM_ADDRESS | Sender address, e.g. `no-reply@yourdomain.com` |
+| SMTP_HOST | SMTP server. **Leave empty in development** to use an automatic Ethereal test inbox |
+| SMTP_PORT | Usually 587 (or 465 with SMTP_SECURE=true) |
+| SMTP_SECURE | `true` for port 465, otherwise `false` |
+| SMTP_USER, SMTP_PASS | SMTP login |
+
+In development without `SMTP_HOST`, no real emails are sent. The server log prints a `preview:` link to view each email. In production, a missing `SMTP_HOST` is an error.
+
+Credentials live only in `server/.env`, never in the frontend or the repository.
+
+### Reliability
+- **Saved first:** the student is saved, then the email is sent in the background. A failed email never removes or blocks the enrollment.
+- **No duplicates:** each send first claims the record atomically (only `pending` or `failed` can become `sending`), so repeated or simultaneous attempts send at most one email.
+- **Retry:** a failed email can be resent from the student page (admin or staff).
+- **Logging:** logs record the student ID, a masked address (`a***@example.com`), the status and an error code. No full addresses, credentials or message contents.
+- **Template:** `services/email/templates/enrollmentConfirmation.js` returns HTML and plain text; user data is HTML-escaped and kept out of the subject's line breaks.
+
+### Tests
+```
+cd server
+npm test
+```
+Tests use fake senders and never send real email. They cover the template content, HTML escaping, sending once, skipping duplicates, recording failures without throwing, and masked logging.
+
+### Larger workloads
+Emails are sent in-process. For high volume, move sending to a job queue (for example BullMQ with Redis) so retries survive server restarts.
