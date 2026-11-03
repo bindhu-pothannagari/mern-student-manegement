@@ -9,6 +9,9 @@ import Privacy from "./pages/Privacy";
 import StudentList from "./pages/StudentList";
 import StudentDetails from "./pages/StudentDetails";
 import StudentRegistration from "./pages/StudentRegistration";
+import Courses from "./pages/Courses";
+import CourseDetails from "./pages/CourseDetails";
+import CourseForm from "./pages/CourseForm";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Profile from "./pages/Profile";
@@ -38,19 +41,25 @@ export default function App() {
           <Route path="/students" element={<StudentList />} />
           <Route path="/students/:id" element={<StudentDetails />} />
         </Route>
-
         <Route element={<ProtectedRoute permission="students:create" />}>
           <Route path="/register" element={<StudentRegistration key="create" />} />
         </Route>
-
         <Route element={<ProtectedRoute permission="students:update" />}>
           <Route path="/students/:id/edit" element={<StudentRegistration key="edit" />} />
+        </Route>
+
+        <Route element={<ProtectedRoute permission="courses:read" />}>
+          <Route path="/courses" element={<Courses />} />
+          <Route path="/courses/:id" element={<CourseDetails />} />
+        </Route>
+        <Route element={<ProtectedRoute permission="courses:manage" />}>
+          <Route path="/courses/new" element={<CourseForm key="create" />} />
+          <Route path="/courses/:id/edit" element={<CourseForm key="edit" />} />
         </Route>
 
         <Route element={<ProtectedRoute permission="users:manage" />}>
           <Route path="/users" element={<Users />} />
         </Route>
-
         <Route element={<ProtectedRoute />}>
           <Route path="/profile" element={<Profile />} />
         </Route>
