@@ -12,6 +12,8 @@ import StudentRegistration from "./pages/StudentRegistration";
 import Courses from "./pages/Courses";
 import CourseDetails from "./pages/CourseDetails";
 import CourseForm from "./pages/CourseForm";
+import Instructors from "./pages/Instructors";
+import InstructorForm from "./pages/InstructorForm";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Profile from "./pages/Profile";
@@ -55,6 +57,13 @@ export default function App() {
         <Route element={<ProtectedRoute permission="courses:manage" />}>
           <Route path="/courses/new" element={<CourseForm key="create" />} />
           <Route path="/courses/:id/edit" element={<CourseForm key="edit" />} />
+        </Route>
+                <Route element={<ProtectedRoute permission="instructors:read" />}>
+          <Route path="/instructors" element={<Instructors />} />
+        </Route>
+        <Route element={<ProtectedRoute permission="instructors:manage" />}>
+          <Route path="/instructors/new" element={<InstructorForm key="create" />} />
+          <Route path="/instructors/:id/edit" element={<InstructorForm key="edit" />} />
         </Route>
 
         <Route element={<ProtectedRoute permission="users:manage" />}>
