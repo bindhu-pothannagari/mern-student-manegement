@@ -170,3 +170,23 @@ Earlier versions stored the course as text. To convert existing students to cour
 npm run migrate-courses
 ```
 It creates a Course for each text value and links the students. It is safe to run again.
+## File uploads
+
+### Storage
+- Files are stored on disk in `server/uploads/` (`photos/` and `documents/`), outside any public folder, and ignored by git.
+- Set a different location with `UPLOAD_DIR` in `server/.env`.
+- MongoDB stores only metadata: storage key, type, size, original name, uploader.
+- All disk access is in `server/services/fileStorage.js`. For production, replace that one file with an object storage implementation such as Amazon S3.
+
+### Security
+- **Content checked, not just the name:** the first bytes of each file must match a real JPG, PNG, WEBP or PDF, and the extension must agree with the content.
+- **Safe filenames:** files are saved as random UUIDs with an extension chosen by the server; user filenames never reach the disk.
+- **No direct access:** files are only served through authenticated API routes with permission checks.
+- **Not executable:** responses use `X-Content-Type-Options: nosniff` and a sandboxing `Content-Security-Policy`; documents are always sent as downloads.
+- **Ownership checked:** a document is looked up by both its ID and the student ID.
+- **Private documents:** viewers cannot list or download documents.
+
+### Consistency
+- New file saved, then database updated; if the database update fails, the new file is deleted.
+- On replace, the old file is deleted only after the database update succeeds.
+- Deleting a student deletes their photo, documents and document records.

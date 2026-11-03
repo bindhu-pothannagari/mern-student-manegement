@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getStudent, deleteStudent } from "../api/studentApi";
 import { useAuth } from "../context/AuthContext";
+import StudentPhoto from "../components/StudentPhoto";
+import StudentDocuments from "../components/StudentDocuments";
 
 export default function StudentDetails() {
   const { id } = useParams();
@@ -63,7 +65,10 @@ export default function StudentDetails() {
 
   return (
     <section>
-      <h1>{student.fullName}</h1>
+      <div className="student-header">
+        <StudentPhoto studentId={student._id} name={student.fullName} hasPhoto={Boolean(student.photo)} canEdit={can("students:update")} />
+        <h1>{student.fullName}</h1>
+      </div>
       {actionError && (
         <p className="error-box" role="alert">
           {actionError}
@@ -111,6 +116,7 @@ export default function StudentDetails() {
           Back to list
         </Link>
       </div>
+      {can("documents:read") && <StudentDocuments studentId={student._id} />}
     </section>
   );
 }
