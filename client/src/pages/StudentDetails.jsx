@@ -81,7 +81,7 @@ export default function StudentDetails() {
         <dt>Gender</dt>
         <dd className="capitalize">{student.gender}</dd>
         <dt>Course</dt>
-        <dd>{student.course}</dd>
+        <dd>{student.course ? <Link to={`/courses/${student.course._id}`}>{student.course.name} ({student.course.code})</Link> : "Not assigned"}</dd>
         {canSeeField("address") && (
           <>
             <dt>Address</dt>

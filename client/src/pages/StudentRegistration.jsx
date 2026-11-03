@@ -4,6 +4,7 @@ import InputField from "../components/InputField";
 import Button from "../components/Button";
 import { createStudent, getStudent, updateStudent } from "../api/studentApi";
 import { useAuth } from "../context/AuthContext";
+import useCourseOptions from "../hooks/useCourseOptions";
 
 const initialForm = {
   fullName: "",
@@ -20,13 +21,6 @@ const genderOptions = [
   { value: "other", label: "Other" },
 ];
 
-// Temporary list. In Task 12 the courses come from the database.
-const courseOptions = [
-  { value: "BCA", label: "BCA" },
-  { value: "BBA", label: "BBA" },
-  { value: "BSc Computer Science", label: "BSc Computer Science" },
-  { value: "MCA", label: "MCA" },
-];
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MOBILE_REGEX = /^[6-9]\d{9}$/;
@@ -65,7 +59,7 @@ function toForm(student) {
     email: student.email ?? "",
     mobile: student.mobile ?? "",
     gender: student.gender ?? "",
-    course: student.course ?? "",
+    course: student.course?._id ?? "",
     address: student.address ?? "",
   };
 }
@@ -76,6 +70,14 @@ export default function StudentRegistration() {
   const navigate = useNavigate();
   const { canEditField } = useAuth();
   const emailLocked = isEdit && !canEditField("email");
+  const { courses } = useCourseOptions();
+  const [originalCourse, setOriginalCourse] = useState("");
+  const courseOptions = courses
+    .filter((c) => c.status === "active" || c._id === originalCourse)
+    .map((c) => ({
+      value: c._id,
+      label: c.status === "active" ? `${c.name} (${c.code})` : `${c.name} (${c.code}) - inactive`,
+    }));
 
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
@@ -92,7 +94,10 @@ export default function StudentRegistration() {
     async function load() {
       try {
         const res = await getStudent(id);
-        if (!ignore) setForm(toForm(res.data));
+        if (!ignore) {
+          setForm(toForm(res.data));
+          setOriginalCourse(res.data.course?._id ?? "");
+        }
       } catch (err) {
         if (!ignore) setLoadError(err.message);
       } finally {

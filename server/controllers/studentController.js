@@ -1,14 +1,18 @@
+import mongoose from "mongoose";
 import Student from "../models/Student.js";
+import Course from "../models/Course.js";
 import AppError from "../utils/AppError.js";
 import {
   STUDENT_FIELDS,
   EDITABLE_STUDENT_FIELDS,
   studentProjection,
 } from "../config/permissions.js";
+import { escapeRegex, readString, readPaging, pageResponse } from "../utils/queryParams.js";
 
-const PAGE_SIZES = [10, 25, 50];
 const SORT_FIELDS = { name: "fullName", createdAt: "createdAt" };
 const GENDERS = ["male", "female", "other"];
+const COURSE_FIELDS = "name code status";
+const OBJECT_ID = /^[a-f\d]{24}$/i;
 
 function pickFields(body = {}, allowed) {
   const data = {};
@@ -22,26 +26,18 @@ function pickFields(body = {}, allowed) {
   return data;
 }
 
-function escapeRegex(text) {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function readString(value, name, maxLength = 100) {
-  if (value === undefined) return undefined;
-  if (typeof value !== "string") {
-    throw new AppError(`${name} must be a single text value`, 400);
+async function checkCourse(courseId, currentCourseId) {
+  if (!OBJECT_ID.test(courseId)) {
+    throw new AppError("Select a valid course", 400);
   }
-  const trimmed = value.trim();
-  if (trimmed.length > maxLength) throw new AppError(`${name} is too long`, 400);
-  return trimmed;
-}
-
-function readInt(value, name, fallback) {
-  if (value === undefined) return fallback;
-  if (typeof value !== "string" || !/^\d+$/.test(value)) {
-    throw new AppError(`${name} must be a whole number`, 400);
+  const course = await Course.findById(courseId).select("status");
+  if (!course) {
+    throw new AppError("Selected course does not exist", 400);
   }
-  return Number(value);
+  const unchanged = currentCourseId && String(currentCourseId) === String(courseId);
+  if (course.status !== "active" && !unchanged) {
+    throw new AppError("Selected course is inactive and not accepting students", 400);
+  }
 }
 
 export async function getStudents(req, res) {
@@ -51,11 +47,9 @@ export async function getStudents(req, res) {
   const sortKey = readString(req.query.sort, "sort") || "createdAt";
   const order =
     readString(req.query.order, "order") || (sortKey === "name" ? "asc" : "desc");
-  const page = readInt(req.query.page, "page", 1);
-  const limit = readInt(req.query.limit, "limit", 10);
+  const { page, limit, skip } = readPaging(req.query);
 
-  if (page < 1) throw new AppError("page must be 1 or more", 400);
-  if (!PAGE_SIZES.includes(limit)) throw new AppError("limit must be 10, 25 or 50", 400);
+  if (course && !OBJECT_ID.test(course)) throw new AppError("course must be a course ID", 400);
   if (gender && !GENDERS.includes(gender)) throw new AppError("Invalid gender filter", 400);
   if (!SORT_FIELDS[sortKey]) throw new AppError("sort must be name or createdAt", 400);
   if (!["asc", "desc"].includes(order)) throw new AppError("order must be asc or desc", 400);
@@ -65,7 +59,7 @@ export async function getStudents(req, res) {
     const pattern = new RegExp(escapeRegex(search), "i");
     filter.$or = [{ fullName: pattern }, { email: pattern }];
   }
-  if (course) filter.course = course;
+  if (course) filter.course = new mongoose.Types.ObjectId(course);
   if (gender) filter.gender = gender;
 
   const direction = order === "asc" ? 1 : -1;
@@ -74,32 +68,31 @@ export async function getStudents(req, res) {
     Student.countDocuments(filter),
     Student.find(filter)
       .select(studentProjection(req.user.role))
+      .populate("course", COURSE_FIELDS)
       .collation({ locale: "en" })
       .sort({ [SORT_FIELDS[sortKey]]: direction, _id: direction })
-      .skip((page - 1) * limit)
+      .skip(skip)
       .limit(limit),
   ]);
 
-  const totalPages = Math.max(1, Math.ceil(total / limit));
-  res.json({
-    success: true,
-    count: students.length,
-    total,
-    page,
-    limit,
-    totalPages,
-    data: students,
-  });
+  res.json(pageResponse(students, total, page, limit));
 }
 
 export async function getStudent(req, res) {
-  const student = await Student.findById(req.params.id).select(studentProjection(req.user.role));
+  const student = await Student.findById(req.params.id)
+    .select(studentProjection(req.user.role))
+    .populate("course", `${COURSE_FIELDS} durationMonths`);
   if (!student) throw new AppError("Student not found", 404);
   res.json({ success: true, data: student });
 }
 
 export async function createStudent(req, res) {
-  const student = await Student.create(pickFields(req.body, STUDENT_FIELDS));
+  const data = pickFields(req.body, STUDENT_FIELDS);
+  if (!data.course) throw new AppError("Course is required", 400);
+  await checkCourse(data.course);
+
+  const student = await Student.create(data);
+  await student.populate("course", COURSE_FIELDS);
   res.status(201).json({ success: true, data: student });
 }
 
@@ -116,11 +109,15 @@ export async function updateStudent(req, res) {
   if (Object.keys(updates).length === 0) {
     throw new AppError("No valid fields to update", 400);
   }
+
+  const existing = await Student.findById(req.params.id).select("course");
+  if (!existing) throw new AppError("Student not found", 404);
+  if (updates.course !== undefined) await checkCourse(updates.course, existing.course);
+
   const student = await Student.findByIdAndUpdate(req.params.id, updates, {
     returnDocument: "after",
     runValidators: true,
-  });
-  if (!student) throw new AppError("Student not found", 404);
+  }).populate("course", COURSE_FIELDS);
   res.json({ success: true, data: student });
 }
 

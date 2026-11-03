@@ -3,6 +3,10 @@ export const PERMISSIONS = {
   "students:create": ["admin", "staff"],
   "students:update": ["admin", "staff"],
   "students:delete": ["admin"],
+  "courses:read": ["admin", "staff", "viewer"],
+  "courses:manage": ["admin"],
+  "instructors:read": ["admin", "staff"],
+  "instructors:manage": ["admin"],
   "users:manage": ["admin"],
 };
 

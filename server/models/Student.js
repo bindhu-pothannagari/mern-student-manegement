@@ -22,13 +22,18 @@ const studentSchema = new mongoose.Schema(
       required: [true, "Gender is required"],
       enum: { values: ["male", "female", "other"], message: "Invalid gender" },
     },
-    course: { type: String, required: [true, "Course is required"], trim: true },
+    course: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Course",
+      required: [true, "Course is required"],
+    },
     address: { type: String, required: [true, "Address is required"], trim: true, minlength: 10 },
   },
   { timestamps: true }
 );
 
-export default mongoose.model("Student", studentSchema);
 studentSchema.index({ createdAt: -1 });
 studentSchema.index({ fullName: 1 });
 studentSchema.index({ course: 1 });
+
+export default mongoose.model("Student", studentSchema);

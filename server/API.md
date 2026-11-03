@@ -149,4 +149,37 @@ npm run set-role -- user@example.com admin
 
 After that, admins manage roles from the Users page.
 
+## Courses
 
+All endpoints require login. Reading needs `courses:read` (all roles); create, update and delete need `courses:manage` (admin).
+
+| Method | Endpoint | Body / query | Success |
+|---|---|---|---|
+| GET | /api/courses | `?search=&status=active\|inactive&page=&limit=` | 200, paginated, each with `studentCount` and `instructor { fullName }` |
+| GET | /api/courses/options | none | 200, all courses `{ _id, name, code, status }` for dropdowns |
+| GET | /api/courses/:id | none | 200, course with full instructor and `studentCount` |
+| GET | /api/courses/:id/students | `?page=&limit=` | 200, enrolled students (role-based field hiding applies) |
+| POST | /api/courses | `{ name, code, description?, durationMonths, fee, status?, instructor? }` | 201 |
+| PATCH | /api/courses/:id | any of the above | 200 |
+| DELETE | /api/courses/:id | none | 200, or 409 if students are enrolled |
+
+Rules: `code` 2–12 letters, numbers or hyphens, unique, stored uppercase. `durationMonths` whole number 1–120. `fee` number ≥ 0. `status` active or inactive. `instructor` must be an existing instructor ID, or null.
+
+## Instructors
+
+Reading needs `instructors:read` (admin, staff); changes need `instructors:manage` (admin).
+
+| Method | Endpoint | Body | Success |
+|---|---|---|---|
+| GET | /api/instructors | `?search=&page=&limit=` | 200, each with `courseCount` |
+| GET | /api/instructors/options | none | 200, `{ _id, fullName, specialization }` |
+| GET | /api/instructors/:id | none | 200, instructor with `courses` |
+| POST | /api/instructors | `{ fullName, email, specialization }` | 201 |
+| PATCH | /api/instructors/:id | any of the above | 200 |
+| DELETE | /api/instructors/:id | none | 200; their courses become unassigned |
+
+## Students: course changes
+
+- `course` is now a course **ID**. Responses include `course: { _id, name, code, status }`.
+- `GET /api/students?course=<courseId>` filters by course.
+- Create and update reject a course ID that is malformed, does not exist, or is **inactive**. A student already in an inactive course can still be edited.
