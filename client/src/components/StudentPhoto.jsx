@@ -21,7 +21,6 @@ export default function StudentPhoto({ studentId, name, hasPhoto, canEdit }) {
 
   useEffect(() => {
     if (!version) {
-      setUrl("");
       return undefined;
     }
     let ignore = false;
@@ -82,7 +81,7 @@ export default function StudentPhoto({ studentId, name, hasPhoto, canEdit }) {
 
   return (
     <div className="photo-box">
-      {url ? (
+      {version && url ? (
         <img src={url} alt={`Photo of ${name}`} className="student-photo" />
       ) : (
         <div className="photo-placeholder" aria-hidden="true">

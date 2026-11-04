@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { getStudents, deleteStudent } from "../api/studentApi";
 import Button from "../components/Button";
@@ -54,7 +54,7 @@ export default function StudentList() {
   const [actionError, setActionError] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
 
-  const updateParams = (changes, { resetPage = true, replace = false } = {}) => {
+  const updateParams = useCallback((changes, { resetPage = true, replace = false } = {}) => {
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev);
@@ -67,7 +67,7 @@ export default function StudentList() {
       },
       { replace }
     );
-  };
+  }, [setSearchParams]);
 
   const goToPage = (n) => updateParams({ page: n > 1 ? n : "" }, { resetPage: false });
 
@@ -76,11 +76,13 @@ export default function StudentList() {
     if (trimmed === search) return;
     const timer = setTimeout(() => updateParams({ search: trimmed }, { replace: true }), 400);
     return () => clearTimeout(timer);
-  }, [searchText, search]);
+  }, [searchText, search, updateParams]);
 
-  useEffect(() => {
-    setSearchText((prev) => (prev.trim() === search ? prev : search));
-  }, [search]);
+  const [prevSearch, setPrevSearch] = useState(search);
+  if (search !== prevSearch) {
+    setPrevSearch(search);
+    if (searchText.trim() !== search) setSearchText(search);
+  }
 
   useEffect(() => {
     let ignore = false;
@@ -108,7 +110,7 @@ export default function StudentList() {
     return () => {
       ignore = true;
     };
-  }, [search, course, gender, sort, order, page, limit, reloadKey]);
+  }, [search, course, gender, sort, order, page, limit, reloadKey, updateParams]);
 
   const retry = () => setReloadKey((k) => k + 1);
 
