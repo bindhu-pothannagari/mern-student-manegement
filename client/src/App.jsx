@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import ProtectedRoute, { GuestRoute } from "./components/ProtectedRoute";
@@ -20,8 +21,9 @@ import Profile from "./pages/Profile";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Users from "./pages/Users";
-import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
+
+const Dashboard = lazy(() => import("./pages/Dashboard"));
 
 export default function App() {
   return (
@@ -68,7 +70,7 @@ export default function App() {
         </Route>
 
         <Route element={<ProtectedRoute permission="reports:read" />}>
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Suspense fallback={<p className="status" role="status">Loading dashboard...</p>}><Dashboard /></Suspense>} />
         </Route>
         <Route element={<ProtectedRoute permission="users:manage" />}>
           <Route path="/users" element={<Users />} />

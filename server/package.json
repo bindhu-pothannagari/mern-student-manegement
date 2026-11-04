@@ -8,7 +8,8 @@
     "dev": "nodemon index.js",
     "set-role": "node scripts/setRole.js",
     "migrate-courses": "node scripts/migrateCourses.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "seed": "node scripts/seed.js"
   },
   "keywords": [],
   "author": "",
