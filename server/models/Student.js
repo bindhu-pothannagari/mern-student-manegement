@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 
+export const ENROLLMENT_STATUSES = ["active", "completed", "withdrawn", "suspended"];
+
 const photoSchema = new mongoose.Schema(
   {
     key: { type: String, required: true },
@@ -50,6 +52,11 @@ const studentSchema = new mongoose.Schema(
       required: [true, "Course is required"],
     },
     address: { type: String, required: [true, "Address is required"], trim: true, minlength: 10 },
+    enrollmentStatus: {
+      type: String,
+      enum: { values: ENROLLMENT_STATUSES, message: "Invalid enrollment status" },
+      default: "active",
+    },
     photo: { type: photoSchema, default: null },
     enrollmentEmail: { type: enrollmentEmailSchema, default: () => ({}) },
   },
@@ -59,6 +66,7 @@ const studentSchema = new mongoose.Schema(
 studentSchema.index({ createdAt: -1 });
 studentSchema.index({ fullName: 1 });
 studentSchema.index({ course: 1 });
+studentSchema.index({ enrollmentStatus: 1 });
 
 studentSchema.set("toJSON", {
   transform(doc, ret) {

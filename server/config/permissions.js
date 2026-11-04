@@ -10,14 +10,15 @@ export const PERMISSIONS = {
   "documents:manage": ["admin", "staff"],
   "documents:delete": ["admin"],
   "instructors:manage": ["admin"],
+  "reports:read": ["admin", "staff"],
   "users:manage": ["admin"],
 };
 
-export const STUDENT_FIELDS = ["fullName", "email", "mobile", "gender", "course", "address"];
+export const STUDENT_FIELDS = ["fullName", "email", "mobile", "gender", "course", "address", "enrollmentStatus"];
 
 export const EDITABLE_STUDENT_FIELDS = {
   admin: STUDENT_FIELDS,
-  staff: ["fullName", "mobile", "gender", "course", "address"],
+  staff: ["fullName", "mobile", "gender", "course", "address", "enrollmentStatus"],
   viewer: [],
 };
 
