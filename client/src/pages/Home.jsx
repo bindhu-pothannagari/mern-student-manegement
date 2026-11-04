@@ -19,6 +19,7 @@ function CapIcon() {
 const STEPS = [
   {
     title: "Choose a Course",
+    to: "/courses",
     text: "Browse programmes with their duration and fees, and pick the right fit.",
     icon: (
       <svg viewBox="0 0 64 64" width="72" height="72" fill="none" strokeWidth="2" aria-hidden="true">
@@ -31,6 +32,7 @@ const STEPS = [
   },
   {
     title: "Register the Student",
+    to: "/register",
     text: "Add the student's details and photo. A confirmation email is sent automatically.",
     icon: (
       <svg viewBox="0 0 64 64" width="72" height="72" fill="none" strokeWidth="2" aria-hidden="true">
@@ -42,6 +44,7 @@ const STEPS = [
   },
   {
     title: "Track Progress",
+    to: "/dashboard",
     text: "Follow enrolment status, documents and reports from one dashboard.",
     icon: (
       <svg viewBox="0 0 64 64" width="72" height="72" fill="none" strokeWidth="2" aria-hidden="true">
@@ -202,7 +205,14 @@ export default function Home() {
               <li key={step.title}>
                 <span className="step-number">{i + 1}</span>
                 <div className="step-icon">{step.icon}</div>
-                <h3>{step.title}</h3>
+                <h3>
+                  <Link
+                    className="step-link"
+                    to={step.to === "/dashboard" && user && !can("reports:read") ? "/students" : step.to}
+                  >
+                    {step.title}
+                  </Link>
+                </h3>
                 <p>{step.text}</p>
               </li>
             ))}
