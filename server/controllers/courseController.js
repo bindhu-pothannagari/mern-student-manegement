@@ -142,3 +142,14 @@ export async function deleteCourse(req, res) {
   await course.deleteOne();
   res.json({ success: true, message: "Course deleted" });
 }
+
+export async function publicCourses(req, res) {
+  const data = await Course.find({ status: "active" })
+    .select("name code description durationMonths fee")
+    .collation({ locale: "en" })
+    .sort({ name: 1 })
+    .limit(50)
+    .lean();
+  res.set("Cache-Control", "public, max-age=300");
+  res.json({ success: true, data });
+}
