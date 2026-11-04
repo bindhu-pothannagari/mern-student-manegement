@@ -20,6 +20,7 @@ import Profile from "./pages/Profile";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Users from "./pages/Users";
+import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
 export default function App() {
@@ -66,6 +67,9 @@ export default function App() {
           <Route path="/instructors/:id/edit" element={<InstructorForm key="edit" />} />
         </Route>
 
+        <Route element={<ProtectedRoute permission="reports:read" />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Route>
         <Route element={<ProtectedRoute permission="users:manage" />}>
           <Route path="/users" element={<Users />} />
         </Route>
