@@ -815,3 +815,49 @@ main:has(> .home-page) {
   text-decoration-color: var(--primary);
   text-decoration-thickness: 3px;
 }
+
+/* ===== Redesign: button text colours ===== */
+a.btn,
+button.btn {
+  color: var(--ink);
+}
+
+a.btn:hover,
+button.btn:hover {
+  color: var(--ink);
+}
+
+a.btn.btn-secondary,
+button.btn.btn-secondary {
+  background: transparent;
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+a.btn.btn-secondary:hover,
+button.btn.btn-secondary:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #ffffff;
+}
+
+a.btn.btn-danger,
+button.btn.btn-danger,
+a.btn.btn-danger:hover,
+button.btn.btn-danger:hover {
+  color: #ffffff;
+}
+
+a.btn.btn-light,
+button.btn.btn-light {
+  background: #ffffff;
+  border-color: #ffffff;
+  color: var(--ink);
+}
+
+a.btn.btn-light:hover,
+button.btn.btn-light:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #ffffff;
+}
