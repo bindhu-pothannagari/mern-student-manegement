@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import helmet from "helmet";
+import { apiLimiter } from "./middleware/rateLimiters.js";
 import authRoutes from "./routes/authRoutes.js";
 import studentRoutes from "./routes/studentRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
@@ -11,6 +13,9 @@ import requireAuth from "./middleware/requireAuth.js";
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
+
+app.disable("x-powered-by");
+app.use(helmet({ crossOriginResourcePolicy: { policy: "same-site" } }));
 
 app.use(
   cors({
@@ -25,6 +30,7 @@ app.get("/", (req, res) => {
   res.json({ message: "API is running" });
 });
 
+app.use("/api", apiLimiter);
 app.use("/api/auth", authRoutes);
 app.use("/api/students", requireAuth, studentRoutes);
 app.use("/api/courses", requireAuth, courseRoutes);

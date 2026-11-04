@@ -6,7 +6,7 @@ export function notFound(req, res) {
 }
 
 // Four parameters tell Express this is the error handler
-export function errorHandler(err, req, res, next) {
+export function errorHandler(err, req, res, _next) {
   if (err.name === "ValidationError") {
     const errors = Object.values(err.errors).map((e) => ({
       field: e.path,
