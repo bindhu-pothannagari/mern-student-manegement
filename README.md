@@ -225,3 +225,19 @@ Tests use fake senders and never send real email. They cover the template conten
 
 ### Larger workloads
 Emails are sent in-process. For high volume, move sending to a job queue (for example BullMQ with Redis) so retries survive server restarts.
+## Dashboard and reports
+
+The dashboard (admin and staff) shows total students, active courses, instructors, students per course, students by enrollment status, monthly enrollment activity and recently registered students, with date-range and course filters.
+
+### How the figures are calculated
+- One MongoDB aggregation with `$facet` computes the total, per-course, per-status, per-month and recent lists over the same filtered students in a single query.
+- Course and status lists are built from the full set of courses and statuses, so items with 0 students still appear.
+- Month grouping uses the `REPORT_UTC_OFFSET` time zone (default India, `+05:30`).
+- Students created before enrollment status existed are counted as active.
+- Indexes on `createdAt`, `course` and `enrollmentStatus` support the filters and grouping.
+
+### Verifying the figures
+The dashboard totals were checked against the student, course and instructor lists, and the per-course, per-status and per-month counts were confirmed to add up to the student total.
+
+### Troubleshooting: "Could not connect to any servers in your MongoDB Atlas cluster"
+Your internet IP address has changed. In MongoDB Atlas, open **Network Access**, click **Add IP Address**, then **Add Current IP Address**. Avoid allowing access from anywhere (0.0.0.0/0).

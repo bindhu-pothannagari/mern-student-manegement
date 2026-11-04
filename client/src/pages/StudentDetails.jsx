@@ -94,6 +94,8 @@ export default function StudentDetails() {
             <dd>{student.address}</dd>
           </>
         )}
+        <dt>Enrollment status</dt>
+        <dd className="capitalize">{student.enrollmentStatus ?? "active"}</dd>
         <dt>Registered</dt>
         <dd>{new Date(student.createdAt).toLocaleDateString()}</dd>
         {student.enrollmentEmail && (
