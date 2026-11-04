@@ -241,3 +241,41 @@ The dashboard totals were checked against the student, course and instructor lis
 
 ### Troubleshooting: "Could not connect to any servers in your MongoDB Atlas cluster"
 Your internet IP address has changed. In MongoDB Atlas, open **Network Access**, click **Add IP Address**, then **Add Current IP Address**. Avoid allowing access from anywhere (0.0.0.0/0).
+
+## Automated tests
+
+### Running
+```
+cd server
+npm test
+
+cd client
+npm test
+```
+The first server run downloads a temporary MongoDB binary (a few minutes); later runs take under a minute.
+
+### Server (Vitest + Supertest + mongodb-memory-server), 78 tests
+| File | Covers |
+|---|---|
+| auth.test.js | Register, hashed passwords, duplicates, invalid input, login, same message for wrong password and unknown email, missing, invalid and expired tokens, refresh, logout invalidating tokens, password change |
+| permissions.test.js | Viewer, staff and admin rules for students, hidden fields, documents, user management, changing IDs in URLs, role changes signing users out, users cannot change their own role |
+| students.test.js | Student CRUD, duplicate email, invalid and missing IDs, inactive courses, malformed JSON, search, course filter, pagination, sorting, invalid query parameters, courses, instructors, delete rules, email resend |
+| uploads.test.js | Valid and fake images, extension mismatch, size limit, viewer blocked, served bytes match, file cleanup on replace and delete, documents as attachments, admin-only delete |
+| dashboard.test.js | Figures match inserted data, course filter, empty range, permissions, invalid filters |
+| validation.test.js | Zod schemas: required fields, formats, unexpected fields, normalization |
+| email.test.js | Email template, sending once, duplicates skipped, failures recorded, masked logs |
+
+- Each test file uses its own in-memory MongoDB; nothing touches the real database.
+- Email sending is mocked; no real emails are sent.
+- Uploads go to a temporary folder.
+
+### Client (Vitest + React Testing Library + jsdom)
+| File | Covers |
+|---|---|
+| validation.test.js | Client validation rules and mapping server errors to fields |
+| forms.test.jsx | Login and signup: field errors, invalid fields, server errors, successful login redirect |
+| protectedRoute.test.jsx | Session check, redirect to login, Access denied, allowed access |
+| studentList.test.jsx | Loading, empty, error with Try again, data, and role-based columns and buttons |
+
+### Bugs
+See `docs/BUGS.md` for bugs found during development, how to reproduce them, and how each fix is verified.
