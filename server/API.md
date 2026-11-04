@@ -227,3 +227,25 @@ Sent automatically after a student is created. Sending happens in the background
 | Method | Endpoint | Permission | Success |
 |---|---|---|---|
 | POST | /api/students/:id/enrollment-email | students:update (admin, staff) | 200 sent; 409 if already sent or not failed; 502 if it fails again |
+## Dashboard
+
+`GET /api/dashboard?from=YYYY-MM-DD&to=YYYY-MM-DD&course=<courseId>`. Permission: `reports:read` (admin, staff). Viewers get 403.
+
+All filters are optional. `from` and `to` filter by registration date, using `REPORT_UTC_OFFSET` (default `+05:30`).
+
+Response `data`:
+
+| Field | Content |
+|---|---|
+| totals | `students` (matching filters), `courses`, `activeCourses`, `instructors` |
+| byCourse | Every course with its student `count` (including 0) |
+| byStatus | Counts for active, completed, withdrawn, suspended |
+| monthly | Registrations per month (`YYYY-MM`), gaps filled with 0, last 12 months |
+| recentStudents | 5 most recent matching students with course and status |
+
+| Status | When |
+|---|---|
+| 400 | Date not in YYYY-MM-DD format, `from` after `to`, invalid course ID |
+| 403 | Role without `reports:read` |
+
+Students also have `enrollmentStatus`: active (default), completed, withdrawn or suspended. Admin and staff can set it when creating or editing a student.
