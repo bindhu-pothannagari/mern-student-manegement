@@ -10,6 +10,7 @@ const PERMISSIONS = {
   "documents:read": ["admin", "staff"],
   "documents:manage": ["admin", "staff"],
   "documents:delete": ["admin"],
+  "reports:read": ["admin", "staff"],
   "users:manage": ["admin"],
 };
 
