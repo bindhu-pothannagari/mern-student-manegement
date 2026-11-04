@@ -13,6 +13,7 @@ const initialForm = {
   gender: "",
   course: "",
   address: "",
+  enrollmentStatus: "active",
 };
 
 const genderOptions = [
@@ -21,6 +22,13 @@ const genderOptions = [
   { value: "other", label: "Other" },
 ];
 
+
+const enrollmentStatusOptions = [
+  { value: "active", label: "Active" },
+  { value: "completed", label: "Completed" },
+  { value: "withdrawn", label: "Withdrawn" },
+  { value: "suspended", label: "Suspended" },
+];
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MOBILE_REGEX = /^[6-9]\d{9}$/;
@@ -45,6 +53,7 @@ function validate(form) {
 
   if (!form.gender) errors.gender = "Please select a gender.";
   if (!form.course) errors.course = "Please select a course.";
+  if (!form.enrollmentStatus) errors.enrollmentStatus = "Please select a status.";
 
   if (!form.address.trim()) errors.address = "Address is required.";
   else if (form.address.trim().length < 10)
@@ -61,6 +70,7 @@ function toForm(student) {
     gender: student.gender ?? "",
     course: student.course?._id ?? "",
     address: student.address ?? "",
+    enrollmentStatus: student.enrollmentStatus ?? "active",
   };
 }
 
@@ -139,6 +149,7 @@ export default function StudentRegistration() {
       gender: form.gender,
       course: form.course,
       address: form.address.trim(),
+      enrollmentStatus: form.enrollmentStatus,
     };
 
     // Send only the fields this role is allowed to change
@@ -270,6 +281,15 @@ export default function StudentRegistration() {
           value={form.course}
           onChange={handleChange}
           error={errors.course}
+        />
+        <InputField
+          label="Enrollment Status"
+          name="enrollmentStatus"
+          as="select"
+          options={enrollmentStatusOptions}
+          value={form.enrollmentStatus}
+          onChange={handleChange}
+          error={errors.enrollmentStatus}
         />
         <InputField
           label="Address"
