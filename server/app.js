@@ -7,6 +7,7 @@ import authRoutes from "./routes/authRoutes.js";
 import studentRoutes from "./routes/studentRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
+import publicRoutes from "./routes/publicRoutes.js";
 import courseRoutes from "./routes/courseRoutes.js";
 import instructorRoutes from "./routes/instructorRoutes.js";
 import requireAuth from "./middleware/requireAuth.js";
@@ -31,6 +32,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api", apiLimiter);
+app.use("/api/public", publicRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/students", requireAuth, studentRoutes);
 app.use("/api/courses", requireAuth, courseRoutes);
