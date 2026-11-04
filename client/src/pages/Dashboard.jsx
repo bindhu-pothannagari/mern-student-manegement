@@ -165,7 +165,7 @@ export default function Dashboard() {
                         formatter={(value) => [value, "Students"]}
                         labelFormatter={(code) => courseLabel(data.byCourse, code)}
                       />
-                      <Bar dataKey="count" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="count" fill="#f5c400" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                   <ul className="sr-only">
@@ -208,7 +208,7 @@ export default function Dashboard() {
                     <XAxis dataKey="label" />
                     <YAxis allowDecimals={false} />
                     <Tooltip formatter={(value) => [value, "Students"]} />
-                    <Line type="monotone" dataKey="count" stroke="#2563eb" strokeWidth={2} dot />
+                    <Line type="monotone" dataKey="count" stroke="#111111" strokeWidth={2} dot />
                   </LineChart>
                 </ResponsiveContainer>
                 <ul className="sr-only">
