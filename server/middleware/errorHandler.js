@@ -23,7 +23,11 @@ export function errorHandler(err, req, res, next) {
       .status(409)
             .json({ success: false, message: `A record with this ${field} already exists` });
   }
-    if (err.name === "MulterError") {
+    if (err.name === "CastError") {
+    return res.status(400).json({ success: false, message: `Invalid value for ${err.path}` });
+  }
+
+  if (err.name === "MulterError") {
     const tooLarge = err.code === "LIMIT_FILE_SIZE";
     const message = tooLarge
       ? "File is too large. Photos can be up to 2 MB and documents up to 5 MB."

@@ -5,6 +5,7 @@ import {
   createStudent,
   updateStudent,
   deleteStudent,
+  resendEnrollmentEmail,
 } from "../controllers/studentController.js";
 import {
   uploadPhoto,
@@ -17,19 +18,21 @@ import {
 } from "../controllers/studentFileController.js";
 import validateObjectId from "../middleware/validateObjectId.js";
 import authorize from "../middleware/authorize.js";
+import validate from "../middleware/validate.js";
 import { photoUpload, documentUpload } from "../middleware/upload.js";
+import { studentCreate, studentUpdate } from "../validation/schemas.js";
 
 const router = Router();
 
 router
   .route("/")
   .get(authorize("students:read"), getStudents)
-  .post(authorize("students:create"), createStudent);
+  .post(authorize("students:create"), validate(studentCreate), createStudent);
 
 router
   .route("/:id")
   .get(authorize("students:read"), validateObjectId, getStudent)
-  .patch(authorize("students:update"), validateObjectId, updateStudent)
+  .patch(authorize("students:update"), validateObjectId, validate(studentUpdate), updateStudent)
   .delete(authorize("students:delete"), validateObjectId, deleteStudent);
 
 router
@@ -50,5 +53,7 @@ router.get(
   downloadDocument
 );
 router.delete("/:id/documents/:docId", authorize("documents:delete"), validateObjectId, deleteDocument);
+
+router.post("/:id/enrollment-email", authorize("students:update"), validateObjectId, resendEnrollmentEmail);
 
 export default router;

@@ -10,6 +10,8 @@ import {
 } from "../controllers/courseController.js";
 import authorize from "../middleware/authorize.js";
 import validateObjectId from "../middleware/validateObjectId.js";
+import validate from "../middleware/validate.js";
+import { courseCreate, courseUpdate } from "../validation/schemas.js";
 
 const router = Router();
 
@@ -23,8 +25,8 @@ router.get(
   validateObjectId,
   getCourseStudents
 );
-router.post("/", authorize("courses:manage"), createCourse);
-router.patch("/:id", authorize("courses:manage"), validateObjectId, updateCourse);
+router.post("/", authorize("courses:manage"), validate(courseCreate), createCourse);
+router.patch("/:id", authorize("courses:manage"), validateObjectId, validate(courseUpdate), updateCourse);
 router.delete("/:id", authorize("courses:manage"), validateObjectId, deleteCourse);
 
 export default router;
