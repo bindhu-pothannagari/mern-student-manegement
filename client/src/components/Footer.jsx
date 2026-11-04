@@ -1,7 +1,9 @@
+const YEAR = new Date().getFullYear();
+
 export default function Footer(){
     return(
         <footer className="footer">
-            <p> © {new Date().getFullYear()} Student Management System</p>
+            <p> © {YEAR} Student Management System</p>
         </footer>
     );
 }
